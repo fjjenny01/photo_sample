@@ -1,30 +1,26 @@
 package com.example.jinfang.jin_photo;
 
-import android.app.Activity;
-import android.app.ListActivity;
-import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
-import android.view.Gravity;
-import android.view.Menu;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.List;
 
-public class MainActivity extends Activity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     MyAdapter mAdapter;
     BooksReaderHelper mDbHelper;
     ListView list;
+    public static final String BOOK_TITLE = "book_title";
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -41,13 +37,14 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
 
     }
 
-//    ExpandableListView expandableListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        ListView list;
+        Toolbar myToolBar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolBar);
+
 
         String[] books={
                 "Wuthering Heights",
@@ -59,7 +56,11 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
                 "Desert Solitaire",
                 "Disgrace",
                 "Geek Love",
-                "Lolita"
+                "Lolita",
+                "The Hitchhiker's Guide to the Galaxy ",
+                "If on a Winter's Night a Traveler ",
+                "Infinite Jest "
+
         };
         Integer[] imageId = {
                 R.mipmap.ic_launcher,
@@ -72,57 +73,63 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
                 R.mipmap.ic_launcher,
                 R.mipmap.ic_launcher,
                 R.mipmap.ic_launcher,
+                R.mipmap.ic_launcher,
+                R.mipmap.ic_launcher,
+                R.mipmap.ic_launcher,
         };
-        initData(books, imageId);
-//        ExpandableListView expandableListView = (ExpandableListView) findViewById(R.id.list);
+        BooksReaderHelper db = new BooksReaderHelper(this);
+        if (db.getAllBooks().size() == 0){
+            initData(books, imageId);
+        }
 
-
-        // Create a progress bar to display while the list loads
-//        ProgressBar progressBar = new ProgressBar(this);
-//        progressBar.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-//                LayoutParams.WRAP_CONTENT, Gravity.CENTER));
-//        progressBar.setIndeterminate(true);
-//        getListView().setEmptyView(progressBar);
-//
-//        // Must add the progress bar to the root of the layout
-//        ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
-//        root.addView(progressBar);
-//
-//        // For the cursor adapter, specify which columns go into which views
-//        String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME};
-//        int[] toViews = {android.R.id.text1}; // The TextView in simple_list_item_1
-
-        // Create an empty adapter we will use to display the loaded data.
-        // We pass null for the cursor, then update it in onLoadFinished()
-//        mAdapter = new SimpleCursorAdapter(this,
-//                R.layout.list_single, null,
-//                fromColumns, toViews, 0);
-        mAdapter = new MyAdapter(MainActivity.this, books, imageId);
+        String[] urls = new String[] {"http://goo.gl/gEgYUd", "http://goo.gl/gEgYUd", "http://goo.gl/gEgYUd", "http://goo.gl/gEgYUd", "http://goo.gl/gEgYUd",
+        "http://goo.gl/gEgYUd", "http://goo.gl/gEgYUd", "http://goo.gl/gEgYUd", "http://goo.gl/gEgYUd", "http://goo.gl/gEgYUd", "http://goo.gl/gEgYUd",
+        "http://goo.gl/gEgYUd", "http://goo.gl/gEgYUd"};
+        mAdapter = new MyAdapter(MainActivity.this, books, imageId, urls);
         list = (ListView) findViewById(R.id.list);
 
         list.setAdapter(mAdapter);
+//        boolean notnull = list==null;
+//        Log.d("Jin", "list is not: "+String.valueOf(notnull))
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(MainActivity.this, "You Clicked ", Toast.LENGTH_SHORT).show();
+                Object entry = parent.getAdapter().getItem(position);
+                Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+                TextView title = (TextView) findViewById(R.id.txt);
+                intent.putExtra(BOOK_TITLE, entry.toString());
+                startActivity(intent);
+//              BooksReaderHelper db = new BooksReaderHelper(view);
+//                db.addBook(new Book(i+1, books[i], "1"));
             }
         });
-//        list.setOnItemClickListener;
-        // Prepare the loader.  Either re-connect with an existing one,
-        // or start a new one.
-//        getLoaderManager().initLoader(0, null, this);
 
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_add_btn:
+                Toast.makeText(MainActivity.this, "You Clicked add", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.action_settings:
+                Toast.makeText(MainActivity.this, "You Clicked settings", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 
     private void initData(String[] books, Integer[] imageId) {
         /*CURD operations*/
+        Log.d("Jin", "init data");
         BooksReaderHelper db = new BooksReaderHelper(this);
-        for (int i =0; i < 10; i++){
+        for (int i =0; i < 13; i++){
              db.addBook(new Book(i+1, books[i], "1"));
         }
-
     }
 
 }
