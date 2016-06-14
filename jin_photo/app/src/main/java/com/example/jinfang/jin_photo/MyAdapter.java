@@ -1,6 +1,7 @@
 package com.example.jinfang.jin_photo;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,13 +22,14 @@ import java.util.List;
 /**
  * Created by jinfang on 6/9/16.
  */
-public class MyAdapter extends ArrayAdapter<String> {
-    private  String[] books;
+public class MyAdapter extends ArrayAdapter<Book> {
+    private List<Book> books;
+//    private  String[] books;
     private  Activity context;
     private  Integer[] imageId;
     private List<String> myUrls;
 
-    public MyAdapter(Activity context, String[] books, Integer[] imageId, String[] myUrls){
+    public MyAdapter(Activity context, List<Book> books, Integer[] imageId, String[] myUrls){
         super(context, R.layout.list_single, books);
         this.context = context;
         this.books = books;
@@ -41,25 +43,28 @@ public class MyAdapter extends ArrayAdapter<String> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-//        return super.getView(position, convertView, parent);
+    public View getView(int position, View convertView, final ViewGroup parent) {
+
+
 
         LayoutInflater inflater = context.getLayoutInflater();
         View rowView= inflater.inflate(R.layout.list_single, null, true);
         TextView txtTitle = (TextView) rowView.findViewById(R.id.txt);
 
         ImageView imageView = (ImageView) rowView.findViewById(R.id.img);
-        txtTitle.setText(books[position]);
+        txtTitle.setText(books.get(position).getTitle());
 
         imageView.setImageResource(imageId[position]);
         Button del_btn = (Button) rowView.findViewById(R.id.deleteBtn);
-//        assert del_btn != null;
-//        boolean notnull = del_btn==null;
-//        Log.d("Jin", String.valueOf(notnull));
+        final Book item = (Book) getItem(position);
+        final int index = position;
         del_btn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 Toast.makeText(getContext(), "You Clicked delete ", Toast.LENGTH_SHORT).show();
+                pressDeleteBtn(parent.getContext(), item, index);
+
+
             }
         });
 
@@ -73,8 +78,24 @@ public class MyAdapter extends ArrayAdapter<String> {
                 .crossFade()
                 .into(imageView);
 
-//        return imageView;
         return rowView;
+
+
+
+
+    }
+
+    @Override
+    public int getCount() {
+        return this.books.size();
+    }
+
+    private void pressDeleteBtn(Context context, Book item, int index){
+        BooksReaderHelper db = new BooksReaderHelper(context);
+
+        db.deleteBook(item);
+        this.books.remove(index);
+        this.notifyDataSetChanged();
 
     }
 }

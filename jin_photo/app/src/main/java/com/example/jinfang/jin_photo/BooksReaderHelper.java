@@ -16,11 +16,6 @@ import java.util.List;
 public class BooksReaderHelper extends SQLiteOpenHelper{
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "BooksReader.db";
-    public static final String TEXT_TYPE = " TEXT";
-    public static final String COMMA_SEP = ",";
-//    public static final String SQL_CREATE_ENTRY = "CREATE TABLE" + BooksReaderContract.BookEntry.TABLE_NAME + "( id INTEGER PRIMARY KEY AUTOINCREMENT, "
-//            + BooksReaderContract.BookEntry.COLUMN_NAME_TITLE
-//    + TEXT_TYPE +  COMMA_SEP + BooksReaderContract.BookEntry.COLUMN_NAME_IMAGE_ID + TEXT_TYPE + ")";
     public static final String SQL_CREATE_ENTRY = "CREATE TABLE books (" + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
         + "title TEXT, imageId TEXT )";
 
@@ -58,7 +53,6 @@ public class BooksReaderHelper extends SQLiteOpenHelper{
 
     public static final String KEY_ID = "id";
     public void addBook(Book book) {
-        Log.d("addBook", book.toString());
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -70,6 +64,7 @@ public class BooksReaderHelper extends SQLiteOpenHelper{
                 null,
                 values);
         db.close();
+        Log.d("addBook", book.toString());
     }
 
     public void deleteBook(Book book) {
